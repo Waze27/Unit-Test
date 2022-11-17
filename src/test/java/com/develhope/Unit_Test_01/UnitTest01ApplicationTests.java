@@ -42,6 +42,7 @@ class UnitTest01ApplicationTests {
     }
 
     private Player getPlayerFromId(Long id) throws Exception {
+
         MvcResult result = this.mockMvc.perform(get("/player/" + id))
                 .andDo(print())
                 .andExpect(status().isOk())
@@ -49,12 +50,8 @@ class UnitTest01ApplicationTests {
 
         try {
             String playerJSON = result.getResponse().getContentAsString();
-            Player player = objectMapper.readValue(playerJSON, Player.class);
 
-            assertThat(player).isNotNull();
-            assertThat(player.getId()).isNotNull();
-
-            return player;
+            return objectMapper.readValue(playerJSON, Player.class);
         } catch (Exception e) {
             return null;
         }
@@ -70,13 +67,10 @@ class UnitTest01ApplicationTests {
     }
 
     private Player createAPlayer(Player player) throws Exception {
+
         MvcResult result = createAPlayerRequest(player);
-        Player userFromResponse = objectMapper.readValue(result.getResponse().getContentAsString(), Player.class);
+        return objectMapper.readValue(result.getResponse().getContentAsString(), Player.class);
 
-        assertThat(userFromResponse).isNotNull();
-        assertThat(userFromResponse.getId()).isNotNull();
-
-        return userFromResponse;
     }
 
     private MvcResult createAPlayerRequest(Player player) throws Exception {
@@ -93,7 +87,8 @@ class UnitTest01ApplicationTests {
 
     @Test
     void createAPlayerTest() throws Exception {
-        createAPlayer();
+        Player player = createAPlayer();
+        assertThat(player.getId()).isNotNull();
     }
 
     @Test
@@ -106,12 +101,17 @@ class UnitTest01ApplicationTests {
                 .andReturn();
 
         List<Player> playerResponse = objectMapper.readValue(result.getResponse().getContentAsString(), List.class);
-        assertThat(playerResponse.size()).isNotNull();
+        assertThat(playerResponse.size()).isNotZero();
     }
 
     @Test
     void readSinglePlayer() throws Exception {
-        createAPlayer();
+        Player player = createAPlayer();
+        assertThat(player.getId()).isNotNull();
+
+        Player playerFormResponse = getPlayerFromId(player.getId());
+        assertThat(playerFormResponse.getId()).isEqualTo(player.getId());
+
     }
 
     @Test
