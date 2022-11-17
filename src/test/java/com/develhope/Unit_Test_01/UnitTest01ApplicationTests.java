@@ -43,7 +43,7 @@ class UnitTest01ApplicationTests {
 
     private Player getPlayerFromId(Long id) throws Exception {
 
-        MvcResult result = this.mockMvc.perform(get("/player/" + id))
+        MvcResult result = this.mockMvc.perform(get("/player" + id))
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andReturn();
@@ -59,6 +59,7 @@ class UnitTest01ApplicationTests {
 
     private Player createAPlayer() throws Exception {
         Player player = new Player();
+        player.setId(1);
         player.setName("Mirko");
         player.setSurname("Di Cristina");
         player.setAge(24);
