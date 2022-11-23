@@ -2,6 +2,7 @@ package com.develhope.Unit_Test_01;
 
 import com.develhope.Unit_Test_01.controller.PlayerController;
 import com.develhope.Unit_Test_01.entity.Player;
+import com.develhope.Unit_Test_01.repository.PlayerRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,6 +14,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
 import java.util.List;
+import java.util.Optional;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -35,6 +37,9 @@ class UnitTest01ApplicationTests {
 
     @Autowired
     private ObjectMapper objectMapper;
+
+    @Autowired
+    private PlayerRepository playerRepository;
 
     @Test
     void contextLoads() {
@@ -110,8 +115,8 @@ class UnitTest01ApplicationTests {
         Player player = createAPlayer();
         assertThat(player.getId()).isNotNull();
 
-        Player playerFormResponse = getPlayerFromId(player.getId());
-        assertThat(playerFormResponse.getId()).isEqualTo(player.getId());
+        Optional<Player> playerFormResponse = playerRepository.findById(player.getId());
+        assertThat(playerFormResponse.isEmpty());
 
     }
 
@@ -123,17 +128,16 @@ class UnitTest01ApplicationTests {
         player.setAge(newAge);
 
         String playerJSON = objectMapper.writeValueAsString(player);
-
-        MvcResult result = this.mockMvc.perform(put("/player/" + player.getId())
+        mockMvc.perform(put("/player/" + player.getId())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(playerJSON))
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andReturn();
-        Player playerResponse = objectMapper.readValue(result.getResponse().getContentAsString(), Player.class);
+        Optional<Player> playerResponse = playerRepository.findById(player.getId());
 
-        assertThat(playerResponse.getId()).isEqualTo(player.getId());
-        assertThat(playerResponse.getAge()).isEqualTo(newAge);
+        assertThat(playerResponse.isPresent());
+        assertThat(playerResponse.get().equals(player));
 
     }
 
@@ -142,13 +146,14 @@ class UnitTest01ApplicationTests {
         Player player = createAPlayer();
         assertThat(player.getId()).isNotNull();
 
-        this.mockMvc.perform(delete("/player/" + player.getId()))
+        mockMvc.perform(delete("/player/" + player.getId()))
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andReturn();
 
-        Player playerResponse = getPlayerFromId(player.getId());
-        assertThat(playerResponse).isNull();
+        Optional<Player> playerResponse = playerRepository.findById(player.getId());
+
+        assertThat(playerResponse.isEmpty());
     }
 
 

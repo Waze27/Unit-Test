@@ -22,31 +22,23 @@ public class PlayerController {
     }
 
     @GetMapping("")
-    public List<Player> readAll(){
+    public List<Player> readAll()                                                                               {
         return playerRepository.findAll();
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<Player> readOne(@PathVariable long id){
-        Optional<Player> user = playerRepository.findById(id);
-        if(user.isPresent()){
-            user.get();
-            return ResponseEntity.status(HttpStatus.OK).build();
-        } else {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        Optional<Player> player = playerRepository.findById(id);
+        if(player.isEmpty()) return ResponseEntity.notFound().build();
+        return ResponseEntity.ok().build();
         }
-    }
+
 
     @PutMapping("/{id}")
     public ResponseEntity<Player> editUser(@PathVariable long id, @RequestBody Player player){
         Optional<Player> findPlayer= playerRepository.findById(id);
-        if (findPlayer.isPresent()) {
-            player.setId(id);
-            playerRepository.save(player);
-            return ResponseEntity.status(HttpStatus.OK).build();
-        } else {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-        }
+        if (findPlayer.isEmpty()) return ResponseEntity.notFound().build();
+        return ResponseEntity.ok().build();
     }
 
     @DeleteMapping("/{id}")
